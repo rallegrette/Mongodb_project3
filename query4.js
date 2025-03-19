@@ -11,7 +11,7 @@
 //      [user_id4, user_id2],
 //      ...
 //  ]
-// user_id is the field from the users collection. Do not use the _id field in users.
+// user_id is the fiel d from the users collection. Do not use the _id field in users.
 // Return an array of arrays.
 
 function suggest_friends(year_diff, dbname) {
