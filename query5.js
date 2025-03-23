@@ -12,6 +12,54 @@ function oldest_friend(dbname) {
 
     let results = {};
     // TODO: implement oldest friends
+    //create bidirectional flat_users collection
+    db.flat_users.drop(); // make sure it's clean
+
+    //unwind friends and write to flat_users
+    db.users.aggregate([
+        { $project: { _id: 0, user_id: 1, friends: 1 } },
+        { $unwind: "$friends" },
+        { $out: "flat_users" }
+    ]);
+
+    //flip each pair bc of bidirectional friendship
+    const original = db.flat_users.find().toArray();
+    original.forEach(doc => {
+        db.flat_users.insertOne({
+            user_id: doc.friends,
+            friends: doc.user_id
+        });
+    });
+
+    // build a map of user_id to YOB
+    const yobMap = {};
+    db.users.find().forEach(user => {
+        yobMap[user.user_id] = user.YOB;
+    });
+
+    //group all friends for each user
+    db.flat_users.aggregate([
+        { $group: { _id: "$user_id", friends: { $push: "$friends" } } }
+    ]).forEach(user => {
+        let uid = user._id;
+        let friends = user.friends;
+
+        //find oldest friend 
+        // earliest YOB, tie-break by smallest user_id
+        let oldest = friends[0];
+        for (let i = 1; i < friends.length; i++) {
+            let current = friends[i];
+            if (
+                yobMap[current] < yobMap[oldest] ||
+                (yobMap[current] === yobMap[oldest] && current < oldest)
+            ) {
+                oldest = current;
+            }
+        }
+
+        results[uid] = oldest;
+    });
+
 
     return results;
 }
