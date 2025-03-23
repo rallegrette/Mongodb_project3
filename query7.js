@@ -20,5 +20,33 @@ function users_born_by_month(dbname) {
 	
 	// Enter your solution below 
 
+    db.users.aggregate([
+        //group by MOB and count them
+        {
+            $group: {
+                _id: "$MOB",
+                borncount: { $sum: 1 } 
+            }
+        },
+
+        //rename _id to MOB
+        {
+            $project: {
+                _id: 0,
+                MOB: "$_id",
+                borncount: 1
+            }
+        },
+
+        //sort by MOB ascending
+        {
+            $sort: { MOB: 1 }
+        },
+
+        {
+            $out: "countbymonth"
+        }
+    ]);
+
 }
 
