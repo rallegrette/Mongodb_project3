@@ -22,4 +22,3 @@ function suggest_friends(year_diff, dbname) {
 
     return pairs;
 }
-vbnjkl
