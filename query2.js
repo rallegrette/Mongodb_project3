@@ -12,7 +12,6 @@ function unwind_friends(dbname) {
     // TODO: unwind friends
 
     db.users.aggregate([
-        { $unwind: "$friends" }, //create one document per friend
         {
             $project: {     //keep user_id and friends, exclude _id from the output
                 "_id": 0,
@@ -20,6 +19,9 @@ function unwind_friends(dbname) {
                 friends: 1
             }
         },
+        
+        { $unwind: "$friends" }, //create one document per friend
+
         { $out: "flat_users" } // Save results to new collection
     ]);
     return;
